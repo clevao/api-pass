@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.devskiller.tasks.blog.exception.NotFoundException;
+import com.devskiller.tasks.blog.exception.PostNotFoundException;
 import com.devskiller.tasks.blog.model.Comment;
 import com.devskiller.tasks.blog.model.Post;
 import com.devskiller.tasks.blog.model.dto.CommentDto;
@@ -41,7 +41,7 @@ public class CommentService {
 	private List<CommentDto> mapCommentsToCommentDtos(final List<Comment> comments) {
 		return comments.stream()
 			.map(this::mapCommentToCommentDto)
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private CommentDto mapCommentToCommentDto(final Comment c) {
@@ -64,10 +64,14 @@ public class CommentService {
 	 */
 	public Long addComment(Long postId, NewCommentDto newCommentDto) {
 
+		if(postId == null) {
+			throw new IllegalArgumentException("The parameter postId cannot be null");
+		}
+
 		final Optional<Post> post = postRepository.findById(postId);
 
 		if(post.isEmpty()) {
-			throw new NotFoundException( String.format("There is no post with id %d", postId));
+			throw new PostNotFoundException( String.format("There is no post with id %d", postId));
 		}
 
 		final Comment comment = mapCommentDtoToComment(newCommentDto, post.get());
